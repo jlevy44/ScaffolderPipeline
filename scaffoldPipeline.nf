@@ -82,7 +82,7 @@ touch done
 module load bedtools/2.25.0
 python ${workingDir}/writeShFiles.py
 cd ${workingDir}/referenceGenomes/${CDS}
-python ../../generateCentromereBeds.py
+#python ../../generateCentromereBeds.py
 cd -
 """
 else {

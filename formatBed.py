@@ -25,7 +25,7 @@ with open(fname,'w') as f:
             if '.' in line:
                 f.write(line[:line.find('\t')]+line[line.find('\t'):line.find('.')].replace('-','')+'\t'+line[line.rfind('0'):].strip('\n') + '\n')
             else:
-                f.write(line.replace(line.split('\t')[3],line.split('\t')[3].replace('-',''))+'\n')
+                f.write(line.replace(line.split('\t')[3],line.split('\t')[3].replace('-','')))
 
 if refSamp == 'r':
     BedTool(fname).sort().merge(c=[4,5,6],o=['distinct','distinct','distinct']).saveas(fname)

@@ -50,7 +50,7 @@ for reference in weights.keys():
                 'cds' not in fasta.lower() and (fasta.endswith('.fa') or fasta.endswith('.fasta'))][0]
     with open('buildRef.sh','w') as f:
         f.write('\n'.join([headSh,'samtools faidx %s' % fastaOld,
-            'python -m jcvi.formats.gff load %s %s --parents=mRNA --children=CDS -o %s' % (
+            'python -m jcvi.formats.gff load %s %s --parents=mRNA --children=CDS --id_attribute=Name -o %s' % (
             [file for file in os.listdir('.') if 'cufflinks' not in file and reference in file and (file.endswith('.gff3') or file.endswith('.gff'))][
                 0], fastaOld, reference + '.cds'),
             'python -m jcvi.formats.gff bed --type=mRNA --key=Name %s -o %s' % (
@@ -89,7 +89,7 @@ for sample in listSamples:
     bbCommands = [headSh.replace('module load samtools/1.3.1\n','module unload samtools\nmodule load samtools/1.4\n')] + ['rm -r ref\nrm BBmapped.bed'] + ['bbmap.sh fastareadlen=600 in=%s.fa ref=%s minid=0.97 ef=0.01 outm=BBmapped.bam ambiguous=toss'%(sample,root+'referenceGenomes/%s/'%CDSspecies+fastaNucOld),
                              'python -m jcvi.formats.sam bed BBmapped.bed BBmapped.bam']#threads=6
     commands1 = [headSh]+['rm *.anchors *.last *.filtered *.prj']+\
-                ['nohup python -m jcvi.compara.catalog ortholog %s %s\nmv %s %s'%(ref,sample,'%s.%s.lifted.anchors'%(ref,sample),'%s.%s.lifted.anchors'%(sample,ref)) for ref in weights.keys()]
+                ['nohup python -m jcvi.compara.catalog ortholog --full %s %s\nmv %s %s'%(ref,sample,'%s.%s.1x1.lifted.anchors'%(ref,sample),'%s.%s.lifted.anchors'%(sample,ref)) for ref in weights.keys()]
     commands2=[headSh]+['rm multipleMapping.bed','\n'.join('python -m jcvi.assembly.syntenypath bed %s --switch --scale=10000 --qbed=%s --sbed=%s -o %s'%('%s.%s.lifted.anchors'%(sample,ref),ref+'_syn'+'.bed',sample+'_%ssyn'%ref+'.bed','%s.synteny.bed'%(ref)) for ref in weights.keys())] \
               + [item for item in ['python -m jcvi.assembly.syntenypath bed %s --switch --scale=10000 --qbed=%s --sbed=%s -o %snuc.synteny.bed'%('nucMap.bed',CDSspecies+'_nucSyn.bed',sample+'_nucSyn.bed',CDSspecies)] if nuc] \
               + [item for item in ['python -m jcvi.assembly.syntenypath bed %s --switch --scale=10000 --qbed=%s --sbed=%s -o %sBB.synteny.bed' % (
