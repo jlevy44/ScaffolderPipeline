@@ -74,7 +74,7 @@ for sample in listSamples:
     fastaNew = sample + '.fa'
     geneNaming = sample.replace('_', '')
     writeBuild = [headSh,'rm -r %s %s.gff3.db %s.chromosome *.iit %s.coords' % (geneNaming, geneNaming, geneNaming, geneNaming),
-        'samtools faidx %s' % fastaNew,
+        'dedupe.sh in=%s out=deduped.fasta ac=f requirematchingnames && mv deduped.fasta %s && samtools faidx %s' %(fastaNew, fastaNew, fastaNew),
         'gmap_build --dir=. -d %s %s' % (geneNaming, fastaNew),
         'gmap --dir=. -d %s -B 5 -A --format=gff3_gene -n 1 -t 6 %s > %s 2> %s' % (
             geneNaming, '../../referenceGenomes/%s/' % CDSspecies + CDSOld, geneNaming + '.gff3', geneNaming + '.log'),
@@ -95,7 +95,7 @@ for sample in listSamples:
               + [item for item in ['python -m jcvi.assembly.syntenypath bed %s --switch --scale=10000 --qbed=%s --sbed=%s -o %sBB.synteny.bed' % (
                         'BBMap.bed', CDSspecies + '_BBSyn.bed', sample + '_BBSyn.bed', CDSspecies)] if BB] \
               + ['nohup python -m jcvi.assembly.allmaps mergebed %s -o %s'%(' '.join(['%s.synteny.bed'%(ref) for ref in (weights.keys() + [item for item in [CDSspecies+'nuc'] if nuc] + [item for item in [CDSspecies+'BB'] if BB])]),'multipleMapping.bed')]
-    qsub=[headSh]+['python -m jcvi.assembly.allmaps path --skipconcorde --cpus=16 --ngen=400 --npop=60 multipleMapping.bed %s.fa' % (sample),
+    qsub=[headSh]+['module swap python/2.7-anaconda_4.3.0 && source activate scaffolder\npython -m jcvi.assembly.allmaps path --skipconcorde --cpus=16 --ngen=400 --npop=60 multipleMapping.bed %s.fa' % (sample),
          'mv multipleMapping.fasta %s%s/%s/%s.fa' % (root,nextVersion,sample.replace(version, nextVersion), sample.replace(version, nextVersion))]
 
     with open('build.sh','w') as f:
